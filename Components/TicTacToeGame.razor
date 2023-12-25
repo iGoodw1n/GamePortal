@@ -1,0 +1,107 @@
+﻿@using GamePortal.Models
+
+@if (Game.IsStarted())
+{
+    @if (Game.Result == ResultOfGame.Winner)
+    {
+        @for (int i = 0; i < field.GetLength(0); i++)
+        {
+            <div class="row">
+                @for (int j = 0; j < field.GetLength(1); j++)
+                {
+                    var local_i = i;
+                    var local_j = j;
+                    <button class="cell @(GetClass(local_i, local_j))" @onclick="(() => { })">
+                        <text>@(field[i, j] ?? ' ')</text>
+                    </button>
+                }
+            </div>
+        }
+
+        <h3>@GetWinnerMessage()</h3>
+        <button @onclick="ResetGame">Rematch</button>
+    }
+    else if (Game.Result == ResultOfGame.Draw)
+    {
+        <h3>It is a draw</h3>
+        <button @onclick="ResetGame">Rematch</button>
+    }
+    else
+    {
+        @for (int i = 0; i < field.GetLength(0); i++)
+        {
+            <div class="row">
+                @for (int j = 0; j < field.GetLength(1); j++)
+                {
+                    var local_i = i;
+                    var local_j = j;
+                    <button class="cell" @onclick="(() => HandleMove((local_i, local_j)))">
+                        <text>@(field[i, j] ?? ' ')</text>
+                    </button>
+                }
+            </div>
+        }
+
+        @if (Game.GetNextPlayer() == UserId)
+        {
+            <text>Your turn!</text>
+        }
+    }
+}
+
+
+
+
+@code {
+    [Parameter, EditorRequired]
+    public IGame Game { get; set; } = default!;
+
+    [CascadingParameter(Name = "UserId")]
+    public string UserId { get; set; } = null!;
+
+    [CascadingParameter(Name = "UserName")]
+    public string UserName { get; set; } = null!;
+
+    private char?[,] field = default!;
+
+    private void HandleMove((int x, int y) position)
+    {
+        Game.HandleNextMove(position, UserId);
+        Game.NotifyChange();
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        SetGameData();
+        return base.OnInitializedAsync();
+    }
+
+    private void SetGameData()
+    {
+        field = Game.GetField();
+    }
+
+    private string GetClass(int i, int j)
+    {
+        if (Game.WinCoords.Contains((i, j)))
+        {
+            return "win";
+        }
+        return "";
+    }
+
+    private string GetWinnerMessage()
+    {
+        if (Game.Winner == UserName)
+        {
+            return "You win! Congradulations!";
+        }
+
+        return $"Winner: {Game.Winner}";
+    }
+    private void ResetGame()
+    {
+        Game.Reset();
+        Game.NotifyChange();
+    }
+}

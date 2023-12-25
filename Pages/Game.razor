@@ -1,0 +1,60 @@
+﻿@page "/game/{id}"
+@inject NavigationManager navman
+@using GamePortal.Services
+@using GamePortal.Models
+@using GamePortal.Components
+
+<h3>Game</h3>
+<h3>@UserName</h3>
+<h3>@UserId</h3>
+@if (game.IsStarted())
+{
+    <TicTacToeGame Game="game" />
+}
+else
+{
+    <text>Waiting other player...</text>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; } = null!;
+
+    [CascadingParameter(Name = "UserId")]
+    public string UserId { get; set; } = null!;
+
+    [CascadingParameter(Name = "UserName")]
+    public string UserName { get; set; } = null!;
+
+    private IGame game = null!;
+
+    protected override Task OnInitializedAsync()
+    {
+        game = GameService.GetGame<TicTacToe>(Id);
+        return base.OnInitializedAsync();
+    }
+
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            game.AddPlayer(UserId, UserName);
+            game.OnChange += () =>
+            {
+                InvokeAsync(StateHasChanged);
+            };
+            StateHasChanged();
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (string.IsNullOrEmpty(UserName))
+        {
+            navman.NavigateTo("/");
+        }
+    }
+}

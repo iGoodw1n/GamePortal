@@ -1,0 +1,32 @@
+﻿@inject NumberService NumberService
+<h3>NumberComponent</h3>
+<h3>Username: @UserName</h3>
+
+<button @onclick="AddNewNumber">Add new Number</button>
+
+@foreach (var item in NumberService.Numbers)
+{
+    <div>@item</div>
+}
+
+@code {
+    [CascadingParameter(Name = "UserName")]
+    public string UserName { get; set; } = string.Empty;
+    private Random rand = new Random();
+
+    protected override Task OnInitializedAsync()
+    {
+        NumberService.OnNewNumber += () =>
+        {
+            // do something with the messenger.Text here
+            InvokeAsync(this.StateHasChanged);
+        };
+
+        return base.OnInitializedAsync();
+    }
+
+    public void AddNewNumber()
+    {
+        NumberService.AddNumber(rand.Next(int.MaxValue));
+    }
+}

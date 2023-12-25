@@ -1,0 +1,33 @@
+﻿@using GamePortal.Services
+@inject UserNameService Service
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <CascadingValue Value="UserId" Name="UserId">
+            <CascadingValue Value="UserName" Name="UserName">
+                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </CascadingValue>
+        </CascadingValue>
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p role="alert">Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code {
+    public string UserName { get; set; } = string.Empty;
+    public string UserId { get; } = Guid.NewGuid().ToString();
+
+    protected override Task OnInitializedAsync()
+    {
+        Service.UpdateName += (name) =>
+        {
+            UserName = name;
+            InvokeAsync(StateHasChanged);
+        };
+        return base.OnInitializedAsync();
+    }
+}
