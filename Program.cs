@@ -1,15 +1,17 @@
-using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using GamePortal;
 using GamePortal.Services;
+using GamePortal.Hubs;
+using GamePortal.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<NumberService>();
-builder.Services.AddBlazoredSessionStorage();
-builder.Services.AddScoped<UserNameService>();
+builder.Services.AddSingleton<GameService>();
+builder.Services.AddHostedService<UserPresenceService>();
+builder.Services.AddHostedService<GameCleanerService>();
 
 
 var app = builder.Build();
@@ -27,6 +29,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
+app.MapHub<GameHub>("/gamehub");
 app.MapFallbackToPage("/_Host");
 
 app.Run();

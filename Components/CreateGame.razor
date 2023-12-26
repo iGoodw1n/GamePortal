@@ -1,0 +1,19 @@
+﻿@inject NavigationManager navman
+
+<div style="display:flex">
+    <select class="form-control" @bind="@SelectedGame">
+        <option value="TicTacToe">TicTacToe</option>
+        <option value="SeaBattle" disabled>Sea Battle</option>
+    </select>
+    <button class="btn btn-primary" @onclick="StartGame">Create game</button>
+</div>
+
+@code {
+    public string SelectedGame { get; set; } = "TicTacToe";
+
+    
+    private void StartGame()
+    {
+        navman.NavigateTo($"/game/{Guid.NewGuid()}?gameType={SelectedGame}");
+    }
+}

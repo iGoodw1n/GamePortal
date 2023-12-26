@@ -1,19 +1,68 @@
 ﻿using System.Collections.Concurrent;
+using GamePortal.Helpers;
 using GamePortal.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GamePortal.Services;
 
-public static class GameService
+public class GameService
 {
-    private static readonly ConcurrentDictionary<string, IGame> _games = new();
+    private readonly IMemoryCache _cache;
 
-    public static IGame GetGame<T>(string gameId) where T : IGame, new()
+    private readonly ConcurrentDictionary<string, DateTime> _gameIds = new();
+
+    public event Action OnChange;
+
+    public GameService(IMemoryCache cache)
     {
-        return _games.GetOrAdd(gameId, new T());
+        _cache = cache;
     }
 
-    public static void SetGame<T>(string gameId, T game) where T : IGame, new()
+    public IGame? GetGame<T>(string gameId) where T : IGame, new()
     {
-        _games.AddOrUpdate(gameId, game, (_, _) => game);
+        _gameIds.AddOrUpdate(gameId, _ = DateTime.UtcNow, (_, _) => DateTime.UtcNow);
+        var game = _cache.GetOrCreate(gameId, cacheEntry =>
+        {
+            cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(600);
+            cacheEntry.AbsoluteExpiration = DateTime.UtcNow + TimeSpan.FromSeconds(3600);
+            cacheEntry.Priority = CacheItemPriority.Normal;
+            return new T();
+        });
+
+        Task.Run(async () =>
+        {
+            await Task.Delay(1000);
+            OnChange?.Invoke();
+        });
+        return game;
+    }
+
+    public IEnumerable<GameRoom> GetGameRooms()
+    {
+        List<GameRoom> games = new ();
+        foreach (var gameId in _gameIds.Keys)
+        {
+            var data = _cache.Get(gameId);
+            if (data is not null)
+            {
+                games.Add(new GameRoom(gameId, (IGame)data));
+            }
+        }
+        return games;
+    }
+
+    public void Update()
+    {
+        OnChange?.Invoke();
+    }
+
+    public IEnumerable<string> GetGameIds()
+    {
+        return _gameIds.Keys;
+    }
+
+    public ConcurrentDictionary<string, DateTime> GetGameStates()
+    {
+        return _gameIds;
     }
 }

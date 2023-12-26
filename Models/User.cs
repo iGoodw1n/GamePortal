@@ -5,6 +5,7 @@ namespace GamePortal.Models;
 public class User
 {
     [Required]
-    public string Name { get; set; }
+    [MinLength(1)]
+    public string Name { get; set; } = null!;
 }
 

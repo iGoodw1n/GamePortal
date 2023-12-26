@@ -1,0 +1,50 @@
+﻿@page "/"
+@inject GameService GameService
+@inject IMemoryCache cache
+@inject NavigationManager navman
+@implements IDisposable
+@using GamePortal.Models
+@using GamePortal.Services
+@using GamePortal.Components
+@using Microsoft.Extensions.Caching.Memory
+
+<h3>Games</h3>
+<CreateGame></CreateGame>
+<GameCardTemplate Items="_games" />
+
+@code {
+    private List<GameRoom> _games = new();
+
+    [CascadingParameter(Name = "UserName")]
+    public string UserName { get; set; } = null!;
+
+    protected override Task OnInitializedAsync()
+    {
+        _games = GameService.GetGameRooms().ToList();
+
+        GameService.OnChange += () =>
+        {
+            _games = GameService.GetGameRooms().ToList();
+            InvokeAsync(StateHasChanged);
+        };
+
+        return base.OnInitializedAsync();
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (string.IsNullOrEmpty(UserName))
+        {
+            navman.NavigateTo($"/login");
+        }
+    }
+
+    public void Dispose()
+    {
+        GameService.OnChange -= () =>
+        {
+            InvokeAsync(StateHasChanged);
+        };
+    }
+}

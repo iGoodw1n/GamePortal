@@ -2,6 +2,7 @@
 
 @if (Game.IsStarted())
 {
+    <h3>@Game.Player1Name VS @Game.Player2Name</h3>
     @if (Game.Result == ResultOfGame.Winner)
     {
         @for (int i = 0; i < field.GetLength(0); i++)
@@ -18,13 +19,13 @@
             </div>
         }
 
-        <h3>@GetWinnerMessage()</h3>
-        <button @onclick="ResetGame">Rematch</button>
+        <h2>@GetWinnerMessage()</h2>
+        <button @onclick="ResetGame" class="btn btn-primary">Rematch</button>
     }
     else if (Game.Result == ResultOfGame.Draw)
     {
-        <h3>It is a draw</h3>
-        <button @onclick="ResetGame">Rematch</button>
+        <h2>It is a draw</h2>
+        <button @onclick="ResetGame" class="btn btn-primary">Rematch</button>
     }
     else
     {
@@ -48,9 +49,6 @@
         }
     }
 }
-
-
-
 
 @code {
     [Parameter, EditorRequired]

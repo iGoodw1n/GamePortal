@@ -1,0 +1,74 @@
+﻿@page "/login"
+@inject NavigationManager navman
+@using GamePortal.Services
+@using GamePortal.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.WebUtilities
+
+
+<h1>Welcome to game Portal!</h1>
+@if (UserName is null)
+{
+    <h2>Introduce yourself</h2>
+}
+<EditForm Model="User" OnSubmit="SetName">
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label class="form-label" for="name">My Name:</label>
+        <InputText id="name" @bind-Value="User.Name" class="form-control" />
+        <ValidationMessage For="@(() => User.Name)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+
+@code {
+    [CascadingParameter(Name = "UpdateName")]
+    public Action<string> UpdateName { get; set; }
+
+    [CascadingParameter(Name = "UserName")]
+    public string UserName { get; set; }
+
+    public User User { get; set; } = new();
+
+    private Random rand = new Random();
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (UserName is not null)
+        {
+            navman.NavigateTo("/");
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+    private async Task SetName()
+    {
+        UpdateName.Invoke(User.Name);
+
+        var returnUrl = GetReturnUrl();
+        if (returnUrl is not null)
+        {
+            navman.NavigateTo(returnUrl);
+        }
+        else
+        {
+            navman.NavigateTo("/");
+        }
+    }
+
+    private string? GetReturnUrl()
+    {
+        string? returnUrl = null;
+        var uri = navman.ToAbsoluteUri(navman.Uri);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("ReturnUrl", out var param))
+        {
+            returnUrl = param.First();
+        }
+
+        return returnUrl;
+    }
+}

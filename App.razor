@@ -1,11 +1,15 @@
-﻿@using GamePortal.Services
-@inject UserNameService Service
+﻿@using GamePortal.Helpers
+@using GamePortal.Services
+@using Microsoft.Extensions.Caching.Memory
+
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <CascadingValue Value="UserId" Name="UserId">
             <CascadingValue Value="UserName" Name="UserName">
-                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+                <CascadingValue Value="UpdateName" Name="UpdateName">
+                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                    <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+                </CascadingValue>
             </CascadingValue>
         </CascadingValue>
     </Found>
@@ -18,16 +22,13 @@
 </Router>
 
 @code {
-    public string UserName { get; set; } = string.Empty;
+    public string? UserName { get; set; }
     public string UserId { get; } = Guid.NewGuid().ToString();
+    public Action<string> UpdateName { get; set; } = null!;
 
     protected override Task OnInitializedAsync()
     {
-        Service.UpdateName += (name) =>
-        {
-            UserName = name;
-            InvokeAsync(StateHasChanged);
-        };
+        UpdateName = (name) => UserName = name;
         return base.OnInitializedAsync();
     }
 }

@@ -1,0 +1,28 @@
+﻿@inject NavigationManager navman
+@using System.Collections.Generic
+@using GamePortal.Models
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+
+<h3>List</h3>
+<div style="display: flex; flex-wrap: wrap">
+    <Virtualize Items="@Items" Context="item">
+        <div class="card">
+            <div class="card-header">PLayer 1: @item.Game.Player1Name VS PLayer 2: @item.Game.Player2Name</div>
+            <div class="card-body">
+                @(item.Game.IsStarted() ? (item.Game.IsFinished() ? "Game finished" : "Game is running") : "Game is not started")
+                <button @onclick="@(() => JoinGame(item))" class="btn btn-primary">@(item.Game.IsStarted() ? "Watch" : "Play")</button>
+            </div>
+            <div class="card-footer">Winner: @item.Game.Winner</div>
+        </div>
+    </Virtualize>
+</div>
+
+@code {
+    [Parameter]
+    public List<GameRoom> Items { get; set; } = new();
+
+    public void JoinGame(GameRoom room)
+    {
+        navman.NavigateTo($"/game/{room.Id}?gameType={room.Game.GetType().Name}");
+    }
+}

@@ -2,10 +2,13 @@
 
 public class GameRoom
 {
-    public string Id { get; set; }
-    public User Player1 { get; set; }
+    public string Id { get; }
 
-    public User Player2 { get; set; }
+    public IGame Game { get; }
 
-    public IGame Game { get; set; }
+    public GameRoom(string id, IGame game)
+    {
+        Id = id;
+        Game = game;
+    }
 }

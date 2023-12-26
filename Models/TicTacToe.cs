@@ -1,20 +1,21 @@
 ﻿using GamePortal.Helpers;
-using System.ComponentModel;
 
 namespace GamePortal.Models;
 
 public class TicTacToe : IGame
 {
-    private char?[,] _field = new char?[3, 3];
-    private string? player1;
-    private string? player2;
+    private readonly char?[,] _field = new char?[3, 3];
+    public string Player1 { get; set; } = null!;
+    public string Player2 { get; set; } = null!;
 
-    private string? player1Name;
-    private string? player2Name;
+    public string Player1Name { get; set; } = null!;
+    public string Player2Name { get; set; } = null!;
 
     private string? nextMoveTurn;
 
     public event Action? OnChange;
+
+    bool _isGameFinished;
 
     public string Winner { get; set; } = string.Empty;
     public List<(int, int)> WinCoords { get; set; } = new();
@@ -23,16 +24,16 @@ public class TicTacToe : IGame
     public void AddPlayer(string playerId, string playerName)
     {
         if (IsStarted()) return;
-        if (player1 == null)
+        if (Player1 == null)
         {
-            player1 = playerId;
-            player1Name = playerName;
+            Player1 = playerId;
+            Player1Name = playerName;
         }
         else
         {
-            player2 = playerId;
-            player2Name = playerName;
-            nextMoveTurn = player1;
+            Player2 = playerId;
+            Player2Name = playerName;
+            nextMoveTurn = Player1;
             NotifyChange();
         }
     }
@@ -84,13 +85,13 @@ public class TicTacToe : IGame
 
         if (TryGetCoordsForVictory(DataForGames.PLAYER1_SYMBOL, out coords))
         {
-            winner = player1Name!;
+            winner = Player1Name!;
             return true;
         }
 
         if (TryGetCoordsForVictory(DataForGames.PLAYER2_SYMBOL, out coords))
         {
-            winner = player2Name!;
+            winner = Player2Name!;
             return true;
         }
 
@@ -205,7 +206,7 @@ public class TicTacToe : IGame
 
     private void SetNextPlayer()
     {
-        nextMoveTurn = nextMoveTurn == player1 ? player2 : player1;
+        nextMoveTurn = nextMoveTurn == Player1 ? Player2 : Player1;
     }
 
     private void SetMark((int x, int y) position, char mark)
@@ -216,7 +217,7 @@ public class TicTacToe : IGame
 
     private char GetMark()
     {
-        return string.Equals(nextMoveTurn, player1) ? DataForGames.PLAYER1_SYMBOL : DataForGames.PLAYER2_SYMBOL;
+        return string.Equals(nextMoveTurn, Player1) ? DataForGames.PLAYER1_SYMBOL : DataForGames.PLAYER2_SYMBOL;
     }
 
     public bool IsDraw()
@@ -233,7 +234,7 @@ public class TicTacToe : IGame
 
     public bool IsStarted()
     {
-        return player1 is not null && player2 is not null;
+        return Player1 is not null && Player2 is not null;
     }
 
     public void NotifyChange()
@@ -249,7 +250,7 @@ public class TicTacToe : IGame
     public void Reset()
     {
         ClearField();
-        nextMoveTurn = player1;
+        nextMoveTurn = Player1;
         Result = ResultOfGame.Continue;
     }
 
@@ -263,4 +264,51 @@ public class TicTacToe : IGame
             }
         }
     }
+
+    public void EndGame(string winnerId)
+    {
+        Winner = winnerId == Player1 ? Player1Name : Player2Name;
+        Result = ResultOfGame.Winner;
+        _isGameFinished = true;
+        NotifyChange();
+    }
+
+    public bool IsFinished()
+    {
+        return _isGameFinished;
+    }
+
+    //public void SetUserPresence(string userId)
+    //{
+    //    if (userId == player1)
+    //    {
+    //        _lastCheckedPlayer1 = DateTime.UtcNow;
+    //    }
+    //    else if (userId == player2)
+    //    {
+    //        _lastCheckedPlayer2 = DateTime.UtcNow;
+    //    }
+    //}
+
+    //private void EndGameIfOffline(string winner)
+    //{
+    //    if (_cache.TryGetValue(winner, out var lastChecked))
+    //    {
+    //        if (IsStarted() && !IsFinished() && (DateTime.UtcNow - (DateTime)lastChecked! > TimeSpan.FromSeconds(5)))
+    //        {
+    //            EndGame(winner);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        EndGame(winner);
+    //    }
+        
+    //}
+
+    //public void CheckPresence()
+    //{
+    //    EndGameIfOffline(Player2!);
+    //    EndGameIfOffline(Player1!);
+    //}
 }
