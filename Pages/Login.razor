@@ -11,12 +11,12 @@
 {
     <h2>Introduce yourself</h2>
 }
-<EditForm Model="User" OnSubmit="SetName">
+<EditForm Model="User" OnSubmit="SetName" style="width: 40%">
     <ValidationSummary />
 
     <div class="form-group">
         <label class="form-label" for="name">My Name:</label>
-        <InputText id="name" @bind-Value="User.Name" class="form-control" />
+        <InputText id="name" @bind-Value="User.Name" class="form-control mb-4" />
         <ValidationMessage For="@(() => User.Name)" />
     </div>
 
