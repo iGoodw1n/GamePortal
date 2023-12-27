@@ -37,25 +37,23 @@
 
     private IGame game = null!;
 
-    private IJSObjectReference jsModule;
-
-    private DateTime date = DateTime.UtcNow;
+    private CancellationTokenSource cts;
 
     protected async override Task OnInitializedAsync()
     {
         game = GameService.GetGame<TicTacToe>(Id)!;
+        cts = new CancellationTokenSource();
         await base.OnInitializedAsync();
     }
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
-        
+
         if (firstRender)
         {
             if (!game.IsStarted())
             {
-                jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/game.js");
-                await jsModule.InvokeVoidAsync("connectToHub", Id, UserId);
+                _ = TaskRunner.RunInBackground(TimeSpan.FromSeconds(1), () => cache.Set(UserId, DateTime.UtcNow), cts.Token);
             }
             if (!game.IsStarted())
             {
@@ -83,9 +81,9 @@
 
     public async ValueTask DisposeAsync()
     {
-        if (jsModule is not null)
+        if (cts is not null)
         {
-            await jsModule.InvokeVoidAsync("stopPing");
+            cts.Cancel();
         }
     }
 }

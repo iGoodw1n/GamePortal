@@ -18,6 +18,8 @@ public interface IGame
 
     event Action OnChange;
 
+    public string? Message { get; set; }
+
     char?[,] GetField();
 
     bool IsDraw();
@@ -36,10 +38,7 @@ public interface IGame
 
     void Reset();
 
-    //void SetUserPresence(string userId);
-
     void NotifyChange();
-    //void CheckPresence();
 }
 
 public enum ResultOfGame

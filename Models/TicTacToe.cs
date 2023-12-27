@@ -17,6 +17,8 @@ public class TicTacToe : IGame
 
     bool _isGameFinished;
 
+    public string? Message { get; set; }
+
     public string Winner { get; set; } = string.Empty;
     public List<(int, int)> WinCoords { get; set; } = new();
     public ResultOfGame Result { get; set; } = ResultOfGame.Continue;
@@ -277,38 +279,4 @@ public class TicTacToe : IGame
     {
         return _isGameFinished;
     }
-
-    //public void SetUserPresence(string userId)
-    //{
-    //    if (userId == player1)
-    //    {
-    //        _lastCheckedPlayer1 = DateTime.UtcNow;
-    //    }
-    //    else if (userId == player2)
-    //    {
-    //        _lastCheckedPlayer2 = DateTime.UtcNow;
-    //    }
-    //}
-
-    //private void EndGameIfOffline(string winner)
-    //{
-    //    if (_cache.TryGetValue(winner, out var lastChecked))
-    //    {
-    //        if (IsStarted() && !IsFinished() && (DateTime.UtcNow - (DateTime)lastChecked! > TimeSpan.FromSeconds(5)))
-    //        {
-    //            EndGame(winner);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        EndGame(winner);
-    //    }
-        
-    //}
-
-    //public void CheckPresence()
-    //{
-    //    EndGameIfOffline(Player2!);
-    //    EndGameIfOffline(Player1!);
-    //}
 }

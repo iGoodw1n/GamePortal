@@ -50,15 +50,16 @@ public class UserPresenceService : BackgroundService
             var player1LastChecked = _cache.Get(game.Player1);
             var player2LastChecked = _cache.Get(game.Player2);
             if (player1LastChecked is null || player2LastChecked is null) return;
-            CheckPlayer(game, (DateTime)player1LastChecked, game.Player2);
-            CheckPlayer(game, (DateTime)player2LastChecked, game.Player1);
+            CheckPlayer(game, (DateTime)player1LastChecked, game.Player2, game.Player1Name);
+            CheckPlayer(game, (DateTime)player2LastChecked, game.Player1, game.Player2Name);
         }
     }
 
-    private void CheckPlayer(IGame game, DateTime playerLastChecked, string winner)
+    private void CheckPlayer(IGame game, DateTime playerLastChecked, string winner, string looser)
     {
         if (DateTime.UtcNow - playerLastChecked > TimeSpan.FromSeconds(5))
         {
+            game.Message = $"{looser} left the game!";
             game.EndGame(winner);
             _gameService.Update();
         }
